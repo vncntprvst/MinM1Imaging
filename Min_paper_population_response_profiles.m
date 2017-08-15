@@ -221,49 +221,74 @@ end
 clearvars -except data averages figOptions durationArray preAlignWindow postAlignWindow stats
 
 %% plot each session, with traces ordered by the timing of their peak activity
-% sessionTraces{1}=[averages.trialAverages];sessionTraces{1}=sessionTraces{1}(1,2:2:end)';
-% sessionTraces{1}=vertcat(sessionTraces{1}{:});
-% % sessionTaskRelatedCells{1}=[data.taskRelated];sessionTaskRelatedCells{1}=sessionTaskRelatedCells{1}(1,1:2:end)';
-% % sessionTaskRelatedCells{1}=vertcat(sessionTaskRelatedCells{1}{:});
-% [~,peakIdx]=max(sessionTraces{1},[],2);
-% [~,peakOrder]=sort(peakIdx);
-% % sessionTaskRelatedCells{1}=sessionTaskRelatedCells{1}(peakOrder,1);
-% sessionTraces{1}=sessionTraces{1}(peakOrder,:);
-% 
-% figOptions.figureStyle={'parula';1:10:size(durationArray,2)+1;-preAlignWindow/1000:postAlignWindow/1000};
-% figOptions.legends={'Time (s)'; 'Cells'; {'Session 1 (naive) ',...
-%         'calcium response aligned to movement initiation'}};
+sessionTraces{1}=[averages.trialAverages];sessionTraces{1}=sessionTraces{1}(1,1:4:end)';
+sessionTraces{1}=vertcat(sessionTraces{1}{:});
+% sessionTaskRelatedCells{1}=[data.taskRelated];sessionTaskRelatedCells{1}=sessionTaskRelatedCells{1}(1,1:2:end)';
+% sessionTaskRelatedCells{1}=vertcat(sessionTaskRelatedCells{1}{:});
+[~,peakIdx]=max(sessionTraces{1},[],2);
+[~,peakOrder]=sort(peakIdx);
+% sessionTaskRelatedCells{1}=sessionTaskRelatedCells{1}(peakOrder,1);
+sessionTraces{1}=sessionTraces{1}(peakOrder,:);
+
+figOptions.figureStyle={'parula';1:10:size(durationArray,2)+1;-preAlignWindow/1000:postAlignWindow/1000};
+figOptions.legends={'Time (s)'; 'Cells'; {'Session 1 (naive) ',...
+        'calcium response aligned to movement initiation'}};
+args{1,1}={sessionTraces{1},figOptions};
 % plot_rasters_psth(sessionTraces{1},figOptions);
-% 
-% sessionTraces{2}=[averages.trialAverages];sessionTraces{2}=sessionTraces{2}(2,2:2:end)';
-% sessionTraces{2}=vertcat(sessionTraces{2}{:});
-% % sessionTaskRelatedCells{2}=[data.taskRelated];sessionTaskRelatedCells{2}=sessionTaskRelatedCells{2}(2,1:2:end)';
-% % sessionTaskRelatedCells{2}=vertcat(sessionTaskRelatedCells{2}{:});
-% [~,peakIdx]=max(sessionTraces{2},[],2);
-% [~,peakOrder]=sort(peakIdx);
-% % sessionTaskRelatedCells{2}=sessionTaskRelatedCells{2}(peakOrder,1);
-% sessionTraces{2}=sessionTraces{2}(peakOrder,:);
-% 
-% figOptions.legends={'Time (s)'; 'Cells'; {'Session 2 (expert) ',...
-%         'calcium response aligned to movement initiation'}};
+
+sessionTraces{2}=[averages.trialAverages];sessionTraces{2}=sessionTraces{2}(2,1:4:end)';
+sessionTraces{2}=vertcat(sessionTraces{2}{:});
+% sessionTaskRelatedCells{2}=[data.taskRelated];sessionTaskRelatedCells{2}=sessionTaskRelatedCells{2}(2,1:2:end)';
+% sessionTaskRelatedCells{2}=vertcat(sessionTaskRelatedCells{2}{:});
+[~,peakIdx]=max(sessionTraces{2},[],2);
+[~,peakOrder]=sort(peakIdx);
+% sessionTaskRelatedCells{2}=sessionTaskRelatedCells{2}(peakOrder,1);
+sessionTraces{2}=sessionTraces{2}(peakOrder,:);
+
+figOptions.legends={'Time (s)'; 'Cells'; {'Session 2 (expert) ',...
+        'calcium response aligned to movement initiation'}};
+args{2,1}={sessionTraces{2},figOptions};
 % plot_rasters_psth(sessionTraces{2},figOptions);
-% 
-% sessionTraces{3}=[averages.trialAverages];sessionTraces{3}=sessionTraces{3}(3,2:2:end)';
-% sessionTraces{3}=vertcat(sessionTraces{3}{:});
-% % sessionTaskRelatedCells{3}=[data.taskRelated];sessionTaskRelatedCells{3}=sessionTaskRelatedCells{3}(3,1:2:end)';
-% % sessionTaskRelatedCells{3}=vertcat(sessionTaskRelatedCells{3}{:});
-% [~,peakIdx]=max(sessionTraces{3},[],2);
-% [~,peakOrder]=sort(peakIdx);
-% % sessionTaskRelatedCells{3}=sessionTaskRelatedCells{3}(peakOrder,1);
-% sessionTraces{3}=sessionTraces{3}(peakOrder,:);
-% 
-% figOptions.legends={'Time (s)'; 'Cells'; {'Session 3 (expert) ',...
-%         'calcium response aligned to movement initiation'}};
+
+sessionTraces{3}=[averages.trialAverages];sessionTraces{3}=sessionTraces{3}(3,1:4:end)';
+sessionTraces{3}=vertcat(sessionTraces{3}{:});
+% sessionTaskRelatedCells{3}=[data.taskRelated];sessionTaskRelatedCells{3}=sessionTaskRelatedCells{3}(3,1:2:end)';
+% sessionTaskRelatedCells{3}=vertcat(sessionTaskRelatedCells{3}{:});
+[~,peakIdx]=max(sessionTraces{3},[],2);
+[~,peakOrder]=sort(peakIdx);
+% sessionTaskRelatedCells{3}=sessionTaskRelatedCells{3}(peakOrder,1);
+sessionTraces{3}=sessionTraces{3}(peakOrder,:);
+
+figOptions.legends={'Time (s)'; 'Cells'; {'Session 3 (expert) ',...
+        'calcium response aligned to movement initiation'}};
+args{3,1}={sessionTraces{3},figOptions};
 % plot_rasters_psth(sessionTraces{3},figOptions);
-% % plot_rasters_psth(sessionTraces{3}(sessionTaskRelatedCells{3}==1,:),figOptions);
+% plot_rasters_psth(sessionTraces{3}(sessionTaskRelatedCells{3}==1,:),figOptions);
+
+plot_rasters_psth(args);
+
+% single figure
+averageTracesh=figure; colormap('bone')
+cmapLims=[min(min(vertcat(sessionTraces{:}))), ...
+    max(max(vertcat(sessionTraces{:})))];
+for sessionNum=1:3
+    subplot(1,3,sessionNum)
+    imagesc(sessionTraces{sessionNum},[-2 6]);colorbar;
+    ylabel('Cells','FontWeight','bold','FontSize',12);
+    xlabel('Time (s.)','FontWeight','bold','FontSize',12);
+    currylim=get(gca,'YLim');
+    set(gca,'XTick',figOptions.figureStyle{2},'TickDir','out');
+    set(gca,'XTickLabel',figOptions.figureStyle{3});
+    % draw alignment bar
+    patch([repmat(figOptions.alignSpecs{1},1,2)-figOptions.alignSpecs{3} repmat(figOptions.alignSpecs{1}+figOptions.alignSpecs{3},1,2)], ...
+        [[0 currylim(2)] fliplr([0 currylim(2)])], ...
+        [0 0 0 0],figOptions.alignSpecs{4},'EdgeColor','none','FaceAlpha',0.3);
+    box off; % axis tight
+    title(['Session ' num2str(sessionNum)]);
+end
 
 %% plot each session for each animal 
-averageTracesh=figure; colormap('bone')
+% averageTracesh=figure; colormap('bone')
 for subjectNum=1:4
     for sessionNum=1:3
         avTraceSubjSessh(subjectNum,sessionNum)=subplot(4,3,sessionNum+3*(subjectNum-1));
@@ -345,11 +370,15 @@ for subjectNum=1:4
     for sessionNum=1:3
     allCells=averages(subjectNum).trialAverages{sessionNum,2};
     % get movement cells index 
-    % use statistatical classification
-    movementReponsiveIdx=cellfun(@(class) contains(class,'pre') | contains(class,'during'),...
-        stats(subjectNum).taskRelated(sessionNum).classification);
+    % use statistatical classification: categories
+    movementReponsiveIdx=stats(subjectNum).taskRelated(sessionNum).indices;
+    % use statistatical classification: categories
+%     movementReponsiveIdx=cellfun(@(class) contains(class,'pre') | contains(class,'during'),...
+%         stats(subjectNum).taskRelated(sessionNum).classification);
+    % use statistatical classification: classify by timing
 %     movementReponsiveIdx=arrayfun(@(catCriterion) catCriterion>=-500 && catCriterion<=500,...
-%         stats(subjectNum).taskRelated(sessionNum).time);  
+%         stats(subjectNum).taskRelated(sessionNum).time); 
+
     mvtResponseTime=stats(subjectNum).taskRelated(sessionNum).time;
     %sort by peak
     [~,peakIdx]=max(allCells,[],2);[~,peakOrder]=sort(peakIdx);
