@@ -67,17 +67,34 @@ for subjectNum=1:numSubject
             baselines=sum(allTraces(:,1:10),2);
             
             %% Wilcoxon sign rank test (or paired t-test)
-            %             responses=mean(allTraces(:,preAlignWindow/interval-3:preAlignWindow/interval+2),2)'; %response average over 6 frames
             responses=sum(allTraces(:,preAlignWindow/interval-4:preAlignWindow/interval+5),2);
-            stats(subjectNum).taskRelated(sessionNum).pVals(cellNum,1)=signrank(baselines,responses); % signrank or ttest
-            stats(subjectNum).taskRelated(sessionNum).indices(cellNum,1)=...
-                stats(subjectNum).taskRelated(sessionNum).pVals(cellNum,1)<0.05;
+            [stats(subjectNum).taskRelated(sessionNum).pVals(cellNum,1),...
+                stats(subjectNum).taskRelated(sessionNum).indices(cellNum,1)]=...
+                signrank(responses,baselines,'Alpha',0.05,'tail','right'); % signrank or ttest
             if stats(subjectNum).taskRelated(sessionNum).indices(cellNum)
                 stats(subjectNum).taskRelated(sessionNum).time(cellNum)=preAlignWindow/interval-5+find(sum(allTraces(:,preAlignWindow/interval-4:preAlignWindow/interval+5))==...
                     max(sum(allTraces(:,preAlignWindow/interval-4:preAlignWindow/interval+5))),1);
             else
                 stats(subjectNum).taskRelated(sessionNum).time(cellNum)=NaN;
             end
+            
+            %% comparing calcium events frenquency to expected frequency (frequency variant of Wilcoxon test above)
+            % However, using ttest (because comparing mean). That's not
+            % right. Distributions would need to be log'ed, but then this
+            % lead to removing -Inf values, thus only comparing
+            % distributions of firing rate when the cell is active
+            
+            %             baselineMean=sum(reshape(allTraces(:,1:15),[1 size(allTraces,1)*15]))/(size(allTraces,1)*15)*1000;
+            %             responses=sum(allTraces(:,preAlignWindow/interval-4:preAlignWindow/interval+5),2)*100; %it's /10 *1000 for 1s window
+            %             [stats(subjectNum).taskRelated(sessionNum).indices(cellNum,1),...
+            %                 stats(subjectNum).taskRelated(sessionNum).pVals(cellNum,1)]=ttest(responses,baselineMean,'Alpha',0.01,'tail','right');
+            %             if ~isnan(stats(subjectNum).taskRelated(sessionNum).indices(cellNum)) & stats(subjectNum).taskRelated(sessionNum).indices(cellNum)
+            %                 stats(subjectNum).taskRelated(sessionNum).time(cellNum)=preAlignWindow/interval-5+find(sum(allTraces(:,preAlignWindow/interval-4:preAlignWindow/interval+5))==...
+            %                     max(sum(allTraces(:,preAlignWindow/interval-4:preAlignWindow/interval+5))),1);
+            %             else
+            %                 stats(subjectNum).taskRelated(sessionNum).time(cellNum)=NaN;
+            %             end
+            
             % Kruskal Wallis on bl vs. pre vs. post
             %             preResponses=mean(allTraces(:,preAlignWindow/interval-3:preAlignWindow/interval),2)';
             %             postResponses=mean(allTraces(:,preAlignWindow/interval:preAlignWindow/interval+3),2)';
@@ -254,17 +271,39 @@ for subjectNum=1:numSubject
             %                         end
             
             %% test movement response vs outcome
-%             respVsOutcome=cell2table(trialOutcomes','VariableNames',{'trialOutcomes'});
-%             respVsOutcome.responses=sum(allTraces(:,16:25),2)>0;
-%             respVsOutcome=respVsOutcome(contains(respVsOutcome.trialOutcomes,'f')|...
-%                 contains(respVsOutcome.trialOutcomes,'s'),:);
-%             contingencyTbl = crosstab(respVsOutcome.trialOutcomes,respVsOutcome.responses);
-%             try
-%                 [stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum),...
-%                     stats(subjectNum).outcomeRelated(sessionNum).pVals(cellNum)] = fishertest(contingencyTbl);
-%             catch
-%                 stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum) = 0;
-%             end
+            %test success vs. failure, success vs. miss, success vs. no seed
+            respVsOutcome=cell2table(trialOutcomes','VariableNames',{'trialOutcomes'});
+            respVsOutcome.responses=sum(allTraces(:,16:25),2)>0;
+            % success vs. failure
+            respVsOutcome=respVsOutcome(contains(respVsOutcome.trialOutcomes,'f')|...
+                contains(respVsOutcome.trialOutcomes,'s'),:);
+            contingencyTbl = crosstab(respVsOutcome.trialOutcomes,respVsOutcome.responses);
+            try
+                [stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum,1),...
+                    stats(subjectNum).outcomeRelated(sessionNum).pVals(cellNum,1)] = fishertest(contingencyTbl);
+            catch
+                stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum,1) = 0;
+            end
+            % success vs. miss
+            respVsOutcome=respVsOutcome(contains(respVsOutcome.trialOutcomes,'m')|...
+                contains(respVsOutcome.trialOutcomes,'s'),:);
+            contingencyTbl = crosstab(respVsOutcome.trialOutcomes,respVsOutcome.responses);
+            try
+                [stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum,2),...
+                    stats(subjectNum).outcomeRelated(sessionNum).pVals(cellNum,2)] = fishertest(contingencyTbl);
+            catch
+                stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum,2) = 0;
+            end
+            % success vs. no seed
+            respVsOutcome=respVsOutcome(contains(respVsOutcome.trialOutcomes,'n')|...
+                contains(respVsOutcome.trialOutcomes,'s'),:);
+            contingencyTbl = crosstab(respVsOutcome.trialOutcomes,respVsOutcome.responses);
+            try
+                [stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum,3),...
+                    stats(subjectNum).outcomeRelated(sessionNum).pVals(cellNum,3)] = fishertest(contingencyTbl);
+            catch
+                stats(subjectNum).outcomeRelated(sessionNum).indices(cellNum,3) = 0;
+            end
         end
         
     end
